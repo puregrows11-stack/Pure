@@ -1,0 +1,56 @@
+name: Build EXE
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Prepare desktop app
+        run: |
+          mkdir desktop
+          cp index.html desktop/index.html
+          cat > desktop/main.js <<'EOF'
+          const { app, BrowserWindow } = require('electron');
+          const path = require('path');
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 480, height: 860, minWidth: 360, minHeight: 600,
+              autoHideMenuBar: true, backgroundColor: '#0e0e1d',
+              title: 'Homework Tracker'
+            });
+            win.loadFile(path.join(__dirname, 'index.html'));
+          }
+          app.whenReady().then(createWindow);
+          app.on('window-all-closed', () => app.quit());
+          EOF
+          cat > desktop/package.json <<'EOF'
+          {
+            "name": "homework-tracker",
+            "version": "1.0.0",
+            "description": "Homework Tracker",
+            "author": "Homework Tracker",
+            "main": "main.js",
+            "build": {
+              "appId": "com.youssef.homeworktracker",
+              "productName": "Homework Tracker",
+              "files": ["main.js", "index.html"],
+              "win": { "target": "portable" },
+              "artifactName": "HomeworkTracker.exe"
+            }
+          }
+          EOF
+      - name: Build exe
+        working-directory: desktop
+        run: |
+          npm install --save-dev electron electron-builder
+          npx electron-builder --win portable --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HomeworkTracker-exe
+          path: desktop/dist/HomeworkTracker.exe
