@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<title>Homework Tracker</title>
+<style>
+:root{
+  --bg1:#dcdcff;--bg2:#fbfaff;--card:#ffffff;--text:#1a1a33;--muted:#6b6b8a;
+  --primary:#4f46e5;--primary-dis:#a59ff0;--primary-soft:#eceafd;--border:#e6e4f5;
+  --shadow:0 8px 28px rgba(79,70,229,.10);--overlay:rgba(20,20,30,.62);--input:#ffffff;--sheet:#faf9fe;
+}
+body.dark{
+  --bg1:#1b1a3a;--bg2:#0e0e1d;--card:#1c1c33;--text:#f1f1fb;--muted:#9a9ab8;
+  --primary:#6d63ff;--primary-dis:#4a4590;--primary-soft:#2a2850;--border:#2c2c48;
+  --shadow:0 8px 28px rgba(0,0,0,.45);--overlay:rgba(0,0,0,.7);--input:#14142a;--sheet:#17172c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);
+  background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 55%) fixed;transition:background .3s,color .3s}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding:24px 18px 120px}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:none}
+svg{display:block}
+/* header */
+.header{display:flex;align-items:center;gap:16px;margin:6px 0 30px}
+.logo{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;color:#fff;flex:none;
+  background:linear-gradient(135deg,#6366f1,#c026d3);box-shadow:0 10px 24px rgba(99,102,241,.35)}
+.header h1{margin:0;font-size:25px;font-weight:800;letter-spacing:-.02em}
+.header p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.grow{flex:1;min-width:0}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.sub-head{display:flex;align-items:center;gap:14px;margin:6px 0 28px}
+.sub-head .tile{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;color:#fff;box-shadow:0 10px 22px rgba(0,0,0,.18);flex:none}
+.sub-head h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-weight:800;letter-spacing:.1em;color:var(--muted);font-size:15px;text-transform:uppercase}
+.remaining{color:var(--muted);font-size:20px}
+.btn-primary{background:var(--primary);color:#fff;border-radius:999px;padding:13px 22px;font-weight:700;font-size:16px;
+  display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 18px rgba(79,70,229,.32)}
+.btn-primary:disabled{background:var(--primary-dis);box-shadow:none;cursor:default}
+/* cards */
+.card{background:var(--card);border-radius:28px;box-shadow:var(--shadow);margin-bottom:16px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;bottom:0;left:0;width:9px;background:var(--accent,#3b82f6)}
+.subject{display:flex;align-items:center;gap:16px;padding:20px 14px 20px 26px;cursor:pointer}
+.subject .ic{width:60px;height:60px;border-radius:20px;display:grid;place-items:center;color:#fff;background:var(--accent);
+  box-shadow:0 10px 20px rgba(0,0,0,.16);flex:none}
+.subject .info{flex:1;min-width:0}
+.subject .name{font-size:21px;font-weight:800;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:15px;font-weight:500;background:var(--primary-soft);color:var(--muted)}
+.badge.done{background:#d3f5e5;color:#047857}
+.trash{color:var(--muted);width:40px;height:40px;display:grid;place-items:center;border-radius:50%;flex:none}
+.chev{color:var(--muted);flex:none;padding:0 4px}
+.empty{border:2px dashed var(--border);border-radius:30px;padding:56px 20px 64px;text-align:center;color:var(--muted);font-size:19px}
+.empty .big{width:80px;height:80px;margin:0 auto 24px;border-radius:26px;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary)}
+.empty.ok .big{background:#d3f5e5;color:#10b981}
+/* exercises */
+.ex{display:flex;align-items:flex-start;gap:16px;padding:20px 14px 20px 26px}
+.ex.low{--accent:#10b981}.ex.medium{--accent:#fbbf24}.ex.high{--accent:#f43f5e}
+.check{width:32px;height:32px;border-radius:50%;border:3px solid var(--primary);flex:none;margin-top:3px;display:grid;place-items:center}
+.ex .body{flex:1;min-width:0}
+.ex .t{font-size:21px;font-weight:600;margin-bottom:10px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:6px 14px;border-radius:999px;font-size:16px;font-weight:500;background:var(--primary-soft);color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.chip.low{background:#d3f5e5;color:#047857}.chip.medium{background:#fdf0c4;color:#b45309}.chip.high{background:#ffe1e7;color:#be123c}
+.archive-toggle{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:500;padding:10px 4px;margin:8px 0 14px}
+.card.arch{background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none;border:1px solid var(--border);opacity:.95}
+.card.arch::before{display:none}
+.arch-row{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.arch-row .ok{width:48px;height:48px;border-radius:50%;background:#d3f5e5;color:#10b981;display:grid;place-items:center;flex:none}
+.arch-row .t{flex:1;min-width:0;font-size:21px;text-decoration:line-through;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:5}
+.nav-in{display:flex;gap:10px;max-width:520px;margin:0 auto}
+.nav button{flex:1;border-radius:24px;padding:10px 0 8px;font-size:15px;color:var(--muted);font-weight:500;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav button.active{background:var(--primary-soft);color:var(--primary)}
+/* modal */
+.overlay{position:fixed;inset:0;background:var(--overlay);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{background:var(--sheet);width:100%;max-width:520px;border-radius:34px 34px 0 0;padding:26px 24px calc(22px + env(safe-area-inset-bottom));max-height:94vh;overflow:auto;animation:up .25s;position:relative}
+.sheet.center h2{text-align:center}
+.sheet h2{margin:0 0 22px;font-size:28px;font-weight:800;letter-spacing:-.02em}
+.grab{width:70px;height:7px;border-radius:9px;background:var(--border);margin:-10px auto 22px}
+.close-x{position:absolute;top:22px;right:22px;width:40px;height:40px;display:grid;place-items:center}
+label.l{display:block;font-weight:600;margin:20px 0 10px;font-size:19px}
+.inp,.sel{width:100%;padding:16px 20px;font-size:19px;border-radius:22px;border:1.5px solid var(--border);background:var(--input);color:var(--text);font-family:inherit}
+.inp:focus,.sel:focus{outline:none;border-color:var(--primary)}
+.colors,.icons{display:flex;flex-wrap:wrap;gap:16px}
+.color{width:62px;height:62px;border-radius:50%;border:4px solid transparent;padding:0}
+.color.sel{border-color:var(--text);box-shadow:inset 0 0 0 3px var(--sheet)}
+.ico{width:62px;height:62px;border-radius:22px;border:1.5px solid var(--border);background:var(--input);display:grid;place-items:center;color:var(--muted)}
+.ico.sel{border:2px solid var(--text);background:var(--primary-soft);color:var(--text)}
+.selwrap{position:relative}
+.selwrap .dot{position:absolute;left:20px;top:50%;width:16px;height:16px;border-radius:50%;transform:translateY(-50%);pointer-events:none}
+.selwrap .sel{padding-left:48px;appearance:none;-webkit-appearance:none}
+.selwrap .arrow{position:absolute;right:18px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)}
+.btn-wide{width:100%;border-radius:22px;padding:18px;margin-top:26px;font-size:19px;font-weight:600;background:var(--primary);color:#fff;box-shadow:0 8px 18px rgba(79,70,229,.25)}
+.btn-wide:disabled{background:var(--primary-dis);box-shadow:none}
+.cancel{display:block;width:100%;font-size:19px;padding:16px;margin-top:4px}
+/* auth */
+.auth{padding-top:6px}
+.back-c{width:60px;height:60px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center}
+.a-top{min-height:60px;margin-bottom:6px}
+.a-ic{width:80px;height:80px;border-radius:26px;margin:10px auto 22px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,#6366f1,#c026d3);box-shadow:0 12px 26px rgba(99,102,241,.35)}
+.auth h1{margin:0;text-align:center;font-size:38px;font-weight:800;letter-spacing:-.03em}
+.auth .sub{text-align:center;color:var(--muted);font-size:20px;margin:12px 0 34px}
+.a-card{background:var(--card);border-radius:34px;box-shadow:var(--shadow);padding:28px 26px}
+.g-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:16px;padding:18px;border-radius:24px;border:1.5px solid var(--border);
+  background:var(--card);font-size:19px;font-weight:600}
+.g-btn.tint{background:var(--primary-soft);color:var(--primary);border-color:var(--border)}
+.or{display:flex;align-items:center;gap:18px;color:var(--muted);margin:26px 0 8px;font-size:18px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+.lab-row{display:flex;justify-content:space-between;align-items:center}
+.field{position:relative}
+.field .fi{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.field .inp{padding-left:56px;border-radius:26px}
+.link{color:var(--primary);font-weight:500;font-size:18px}
+.err{color:#e11d48;font-size:16px;margin-top:14px;min-height:0;text-align:center}
+.note{color:var(--muted);font-size:15px;text-align:center;margin-top:16px;line-height:1.5}
+.foot{text-align:center;color:var(--muted);font-size:19px;margin-top:34px}
+.foot .link{font-weight:700}
+.msg-card{background:var(--card);border-radius:34px;box-shadow:var(--shadow);padding:42px 30px;text-align:center;font-size:20px;line-height:1.5}
+/* settings */
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;gap:12px;font-size:19px}
+.set-row small{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.switch{width:58px;height:32px;border-radius:999px;background:var(--border);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:.2s}
+.switch.on{background:var(--primary)}.switch.on::after{left:29px}
+.danger{color:#e11d48;font-weight:600;display:flex;align-items:center;gap:10px;font-size:19px}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#1a1a33;color:#fff;padding:14px 20px;border-radius:18px;font-size:16px;z-index:40;max-width:88%;text-align:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+
+/* ================= ANIMATIONS ================= */
+:root{--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1)}
+/* page enter: staggered rise */
+@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+#app.enter>*{animation:rise .55s var(--ease) both}
+#app.enter>*:nth-child(1){animation-delay:.02s}
+#app.enter>*:nth-child(2){animation-delay:.08s}
+#app.enter>*:nth-child(3){animation-delay:.14s}
+#app.enter>*:nth-child(4){animation-delay:.20s}
+#app.enter>*:nth-child(5){animation-delay:.26s}
+#app.enter>*:nth-child(6){animation-delay:.32s}
+#app.enter>*:nth-child(7){animation-delay:.38s}
+#app.enter>*:nth-child(8){animation-delay:.44s}
+#app.enter>*:nth-child(n+9){animation-delay:.5s}
+/* new item pop / removal / check */
+@keyframes pop{0%{opacity:0;transform:scale(.8) translateY(14px)}60%{transform:scale(1.03)}100%{opacity:1;transform:none}}
+.card.pop{animation:pop .55s var(--spring) both}
+@keyframes out{to{opacity:0;transform:translateX(70px) scale(.92);height:0;margin-bottom:0}}
+.card.out{animation:out .3s ease-in forwards;pointer-events:none}
+@keyframes done{0%{transform:none;opacity:1}60%{transform:scale(1.03)}100%{opacity:0;transform:translateX(-60px) scale(.94)}}
+.card.checking{animation:done .5s ease-in .12s forwards;pointer-events:none}
+.card.checking .check{background:var(--primary);color:#fff;animation:ckpop .35s var(--spring)}
+@keyframes ckpop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+/* press / hover feedback */
+.card,.btn-primary,.btn-wide,.g-btn,.icon-btn,.trash,.ico,.color,.nav button,.back-c,.check,.switch{transition:transform .18s var(--ease),box-shadow .25s,background .25s,color .25s}
+.card:active{transform:scale(.985)}
+.btn-primary:active,.btn-wide:active,.g-btn:active{transform:scale(.95)}
+.icon-btn:active,.trash:active,.back-c:active{transform:scale(.85)}
+.ico:active,.color:active{transform:scale(.88)}
+.ico.sel,.color.sel{transform:scale(1.08)}
+.check:active{transform:scale(.8)}
+.nav button:active{transform:scale(.92)}
+.switch::after{transition:left .25s var(--spring)}
+@media(hover:hover){.card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(79,70,229,.18)}.btn-primary:hover,.btn-wide:hover{transform:translateY(-2px)}}
+/* ambient motion */
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(-3deg)}}
+.logo,.a-ic{animation:floaty 4.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.empty .big{animation:bob 3s ease-in-out infinite}
+.sub-head .tile{animation:ckpop .5s var(--spring) both}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+.a-card.shake{animation:shake .5s}
+/* modals */
+.overlay{animation:fade .25s ease both}
+.sheet{animation:sheetUp .45s var(--spring) both}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.overlay.out{animation:fadeOut .22s ease forwards}
+.overlay.out .sheet{animation:sheetDown .22s ease-in forwards}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes sheetDown{to{transform:translateY(100%)}}
+.toast{animation:toastIn .4s var(--spring) both}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.badge,.chip{transition:background .3s,color .3s}
+.nav{animation:navUp .6s var(--ease) both}
+@keyframes navUp{from{transform:translateY(100%)}to{transform:none}}
+
+/* ================= SPLASH ================= */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 50% 0%,var(--bg1) 0%,var(--bg2) 70%);overflow:hidden;
+  transition:opacity .6s ease,transform .6s var(--ease)}
+#splash.hide{opacity:0;transform:scale(1.08);pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:orb 8s ease-in-out infinite}
+.orb.o1{width:260px;height:260px;background:#6366f1;top:-60px;left:-70px}
+.orb.o2{width:300px;height:300px;background:#c026d3;bottom:-90px;right:-90px;animation-delay:-3s}
+.orb.o3{width:160px;height:160px;background:#06b6d4;top:55%;left:60%;opacity:.35;animation-delay:-5s}
+@keyframes orb{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-26px) scale(1.15)}}
+.s-logo{position:relative;width:150px;height:150px;display:grid;place-items:center;animation:logoIn .9s var(--spring) both}
+@keyframes logoIn{0%{opacity:0;transform:scale(.3) rotate(-25deg)}100%{opacity:1;transform:none}}
+.s-ring{position:absolute;inset:-14px;border-radius:50%;border:2px solid rgba(99,102,241,.45);animation:ring 2.4s ease-out infinite}
+.s-ring.r2{animation-delay:1.2s}
+@keyframes ring{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.55);opacity:0}}
+.s-logo svg{width:150px;height:150px;filter:drop-shadow(0 18px 30px rgba(99,102,241,.45))}
+.s-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s var(--ease) forwards}
+.s-draw.d1{animation-delay:.5s}.s-draw.d2{animation-delay:.7s}.s-draw.d3{animation-delay:.9s}
+.s-draw.d4{animation-delay:1.35s;animation-duration:.5s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.s-badge{transform-origin:94px 94px;transform:scale(0);animation:ckpop .55s var(--spring) 1.15s forwards}
+.s-spark{transform-origin:center;transform-box:fill-box;opacity:0;animation:spark 1.6s ease-in-out 1.5s infinite}
+.s-spark.b{animation-delay:1.9s}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1) rotate(90deg)}}
+.s-title{margin:34px 0 0;font-size:36px;font-weight:800;letter-spacing:-.03em;display:flex;gap:10px;opacity:0;animation:rise .7s var(--ease) 1.2s forwards}
+.s-title span:last-child{background:linear-gradient(90deg,#6366f1,#c026d3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.s-tag{margin:10px 0 0;color:var(--muted);font-size:16px;opacity:0;animation:rise .7s var(--ease) 1.55s forwards}
+.s-bar{position:absolute;bottom:calc(64px + env(safe-area-inset-bottom));width:140px;height:5px;border-radius:9px;background:var(--border);overflow:hidden}
+.s-bar i{display:block;height:100%;width:100%;border-radius:9px;background:linear-gradient(90deg,#6366f1,#c026d3);transform:translateX(-100%);animation:load 2.3s var(--ease) .2s forwards}
+@keyframes load{to{transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="nav" id="nav" style="display:none"><div class="nav-in" id="nav-in"></div></div>
+<div id="modal"></div>
+
+<div id="splash" aria-label="Homework Tracker">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="s-logo">
+    <span class="s-ring"></span><span class="s-ring r2"></span>
+    <svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sg" x1="0" y1="0" x2="150" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#c026d3"/></linearGradient>
+        <linearGradient id="sg2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+      </defs>
+      <rect width="150" height="150" rx="44" fill="url(#sg)"/>
+      <rect x="2" y="2" width="146" height="146" rx="42" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>
+      <g stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path class="s-draw d1" pathLength="1" d="M75 52v52"/>
+        <path class="s-draw d2" pathLength="1" d="M75 52C65 44 48 43 36 47v53c12-4 29-3 39 5"/>
+        <path class="s-draw d3" pathLength="1" d="M75 52c10-8 27-9 39-5v53c-12-4-29-3-39 5"/>
+      </g>
+      <g class="s-badge">
+        <circle cx="108" cy="104" r="21" fill="url(#sg2)" stroke="#fff" stroke-width="5"/>
+        <path class="s-draw d4" pathLength="1" d="M99 104l7 7 12-14" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <path class="s-spark" d="M118 28l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff"/>
+      <path class="s-spark b" d="M30 28l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff"/>
+    </svg>
+  </div>
+  <h1 class="s-title"><span>Homework</span><span>Tracker</span></h1>
+  <p class="s-tag">Organize assignments by subject</p>
+  <div class="s-bar"><i></i></div>
+</div>
+
+<script>
+/* ---------- icons ---------- */
+const P={
+ calc:'<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/>',
+ atom:'<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>',
+ flask:'<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
+ book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+ lang:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+ doc:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+ globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+ brain:'<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/>',
+ moonstar:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/>',
+ moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+ home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+ gear:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+ plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+ back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+ chev:'<path d="m9 18 6-6-6-6"/>',
+ down:'<path d="m6 9 6 6 6-6"/>',
+ trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ checkc:'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+ user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+ archive:'<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+ undo:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+ x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+ mail:'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+ lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/>',
+ userplus:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',
+ alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+ logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+ key:'<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>'
+};
+const ic=(n,s=24,sw=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`;
+const GOOGLE='<svg width="24" height="24" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>';
+
+/* ---------- constants ---------- */
+const COLORS=["#64748b","#3b82f6","#8b5cf6","#10b981","#f59e0b","#f43f5e","#06b6d4","#f97316"];
+const ICONS=["calc","atom","flask","book","lang","doc","globe","brain","moonstar"];
+const IMP={low:{label:"Low",color:"#10b981"},medium:{label:"Medium",color:"#fbbf24"},high:{label:"High",color:"#f43f5e"}};
+const RANK={high:0,medium:1,low:2};
+
+/* ---------- storage ---------- */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let ui=LS.get("hwt_ui",{dark:false});
+let users=LS.get("hwt_users",{});
+let session=LS.get("hwt_session",null);
+let data={subjects:[],exercises:[]};
+const loadData=()=>{data=LS.get("hwt_data_"+session,{subjects:[],exercises:[]})};
+const saveData=()=>LS.set("hwt_data_"+session,data);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function hash(email,pw){
+  const s="hwt|"+email+"|"+pw;
+  try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+  catch(e){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return "f"+h}
+}
+
+/* ---------- view state ---------- */
+let view={page:"login",subjectId:null,showArchive:false,resetEmail:null};
+if(session&&users[session]){loadData();view.page="home"}else{session=null;if(location.hash.startsWith("#reset"))view.page="invalid"}
+
+/* ---------- render ---------- */
+let lastKey=null,fresh=null;
+const animOut=(el,cls,fn,ms)=>{const c=el&&el.closest(".card");if(c){c.classList.add(cls);setTimeout(fn,ms)}else fn()};
+function applyTheme(){document.body.classList.toggle("dark",!!ui.dark)}
+const moonBtn=()=>`<button class="icon-btn" data-a="dark" aria-label="Toggle dark mode">${ic(ui.dark?"sun":"moon",26)}</button>`;
+function render(){
+  applyTheme();
+  const app=document.getElementById("app"),nav=document.getElementById("nav");
+  const inApp=["home","subject","settings"].includes(view.page);
+  const R={home:homeHTML,subject:subjectHTML,settings:settingsHTML,login:loginHTML,signup:signupHTML,forgot:forgotHTML,resetnew:resetNewHTML,invalid:invalidHTML};
+  app.innerHTML=R[view.page]();
+  const key=view.page+(view.subjectId||"");
+  app.classList.toggle("enter",key!==lastKey);lastKey=key;fresh=null;
+  nav.style.display=inApp?"block":"none";
+  document.getElementById("nav-in").innerHTML=
+    `<button data-a="nav" data-p="home" class="${view.page!=="settings"?"active":""}">${ic("home",26)}Home</button>
+     <button data-a="nav" data-p="settings" class="${view.page==="settings"?"active":""}">${ic("gear",26)}Settings</button>`;
+}
+function pendingOf(sid){return data.exercises.filter(e=>e.subjectId===sid&&!e.done)}
+
+function homeHTML(){
+  const list=!data.subjects.length
+   ?`<div class="empty"><div class="big">${ic("book",38)}</div>No subjects yet. Add your first one.</div>`
+   :data.subjects.map(s=>{
+      const total=data.exercises.filter(e=>e.subjectId===s.id).length,p=pendingOf(s.id).length;
+      const badge=total===0?`<span class="badge">No exercises</span>`:p===0?`<span class="badge done">All done</span>`:`<span class="badge">${p} exercise${p>1?"s":""}</span>`;
+      return `<div class="card${s.id===fresh?" pop":""}" style="--accent:${s.color}"><div class="subject" data-a="open" data-id="${s.id}">
+        <div class="ic">${ic(s.icon,30)}</div>
+        <div class="info"><div class="name">${esc(s.name)}</div>${badge}</div>
+        <button class="trash" data-a="delSubj" data-id="${s.id}" aria-label="Delete subject">${ic("trash",22)}</button>
+        <span class="chev">${ic("chev",22)}</span></div></div>`}).join("");
+  return `<div class="header"><div class="logo">${ic("book",32)}</div>
+    <div class="grow"><h1>Homework Tracker</h1><p>Organize assignments by subject</p></div>${moonBtn()}</div>
+    <div class="row"><span class="section-title">Subjects</span><button class="btn-primary" data-a="addSubj">${ic("plus",20,2.5)} Add</button></div>${list}`;
+}
+function exCard(e){
+  return `<div class="card ex ${e.importance}${e.id===fresh?" pop":""}">
+    <button class="check" data-a="toggle" data-id="${e.id}" aria-label="Mark as done"></button>
+    <div class="body"><div class="t">${esc(e.title)}</div><div class="chips">
+      ${e.who?`<span class="chip">${ic("user",18)}${esc(e.who)}</span>`:""}
+      <span class="chip ${e.importance}">${IMP[e.importance].label}</span></div></div>
+    <button class="trash" data-a="delEx" data-id="${e.id}" aria-label="Delete">${ic("trash",22)}</button></div>`;
+}
+function archCard(e){
+  return `<div class="card arch"><div class="arch-row"><span class="ok">${ic("checkc",26)}</span>
+    <span class="t">${esc(e.title)}</span>
+    <button class="trash" data-a="toggle" data-id="${e.id}" aria-label="Restore">${ic("undo",22)}</button>
+    <button class="trash" data-a="delEx" data-id="${e.id}" aria-label="Delete">${ic("trash",22)}</button></div></div>`;
+}
+function subjectHTML(){
+  const s=data.subjects.find(x=>x.id===view.subjectId);
+  if(!s){view.page="home";return homeHTML()}
+  const all=data.exercises.filter(e=>e.subjectId===s.id);
+  const pend=all.filter(e=>!e.done).sort((a,b)=>RANK[a.importance]-RANK[b.importance]||a.created-b.created);
+  const arch=all.filter(e=>e.done);
+  const list=pend.length?pend.map(exCard).join(""):`<div class="empty ok"><div class="big">${ic("checkc",40)}</div>No pending exercises. You're all caught up.</div>`;
+  const archive=arch.length?`<button class="archive-toggle" data-a="archive">${ic("archive",26)} ${view.showArchive?"Hide":"Show"} archive (${arch.length})</button>${view.showArchive?arch.map(archCard).join(""):""}`:"";
+  return `<div class="sub-head"><button class="icon-btn" data-a="back" aria-label="Back">${ic("back",26)}</button>
+    <div class="tile" style="background:${s.color}">${ic(s.icon,30)}</div>
+    <div class="grow"><h1>${esc(s.name)}</h1></div>${moonBtn()}</div>
+    <div class="row"><span class="remaining">${pend.length} remaining</span>
+    <button class="btn-primary" data-a="addEx">${ic("plus",20,2.5)} Add exercise</button></div>${list}${archive}`;
+}
+function settingsHTML(){
+  return `<div class="header"><div class="logo">${ic("gear",32)}</div><div class="grow"><h1>Settings</h1></div></div>
+   <div class="card"><div class="set-row"><div><b>Account</b><small>${esc(session||"")}</small></div>
+     <button class="danger" data-a="logout" style="color:var(--primary)">${ic("logout",22)} Log out</button></div></div>
+   <div class="card"><div class="set-row"><b>Dark mode</b><button class="switch ${ui.dark?"on":""}" data-a="dark" aria-label="Dark mode"></button></div></div>
+   <div class="card"><div class="set-row"><button class="danger" data-a="reset">${ic("trash",22)} Erase all my data</button></div></div>`;
+}
+
+/* ---------- auth pages ---------- */
+const field=(icon,id,type,ph,extra="")=>`<div class="field"><span class="fi">${ic(icon,22)}</span><input class="inp" id="${id}" type="${type}" placeholder="${ph}" ${extra}></div>`;
+function loginHTML(){
+  return `<div class="auth"><div class="a-top"><button class="back-c" data-a="gotoSignup" aria-label="Back">${ic("back",26)}</button></div>
+   <div class="a-ic">${ic("login",38)}</div><h1>Welcome back</h1><p class="sub">Log in to your account</p>
+   <div class="a-card"><form data-form="login" novalidate>
+     <button type="button" class="g-btn" data-a="google">${GOOGLE} Continue with Google</button>
+     <div class="or">OR</div>
+     <label class="l">Email</label>${field("mail","f-email","email","you@example.com",'autocomplete="email"')}
+     <div class="lab-row"><label class="l">Password</label><button type="button" class="link" data-a="gotoForgot">Forgot password?</button></div>
+     ${field("lock","f-pw","password","••••••••",'autocomplete="current-password"')}
+     <div class="err" id="err"></div>
+     <button class="btn-wide" type="submit">Log in</button></form></div>
+   <div class="foot">Don't have an account? <button class="link" data-a="gotoSignup">Create one</button></div></div>`;
+}
+function signupHTML(){
+  return `<div class="auth"><div class="a-top"><button class="back-c" data-a="gotoLogin" aria-label="Back">${ic("back",26)}</button></div>
+   <div class="a-ic">${ic("userplus",38)}</div><h1>Create your account</h1><p class="sub">Sign up to get started</p>
+   <div class="a-card"><form data-form="signup" novalidate>
+     <button type="button" class="g-btn tint" data-a="google">${GOOGLE} Continue with Google</button>
+     <div class="or">OR</div>
+     <label class="l">Email</label>${field("mail","f-email","email","you@example.com",'autocomplete="email"')}
+     <label class="l">Password</label>${field("lock","f-pw","password","••••••••",'autocomplete="new-password"')}
+     <label class="l">Confirm Password</label>${field("lock","f-pw2","password","••••••••",'autocomplete="new-password"')}
+     <div class="err" id="err"></div>
+     <button class="btn-wide" type="submit">Create account</button></form></div>
+   <div class="foot">Already have an account? <button class="link" data-a="gotoLogin">Log in</button></div></div>`;
+}
+function forgotHTML(){
+  return `<div class="auth"><div class="a-top"><button class="back-c" data-a="gotoLogin" aria-label="Back">${ic("back",26)}</button></div>
+   <div class="a-ic" style="margin-top:90px">${ic("mail",38)}</div><h1>Reset password</h1><p class="sub">We'll send you a link to reset it</p>
+   <div class="a-card"><form data-form="forgot" novalidate>
+     <label class="l" style="margin-top:0">Email address</label>${field("mail","f-email","email","you@example.com",'autocomplete="email"')}
+     <div class="err" id="err"></div>
+     <button class="btn-wide" type="submit" style="margin-top:20px">Send reset link</button>
+     <div class="note">Accounts are stored on this device, so no email is sent: after you continue you can set a new password right away.</div></form></div>
+   <div class="foot" style="margin-top:30px"><button class="link" data-a="gotoLogin">← Back to log in</button></div></div>`;
+}
+function resetNewHTML(){
+  return `<div class="auth"><div class="a-top"><button class="back-c" data-a="gotoLogin" aria-label="Back">${ic("back",26)}</button></div>
+   <div class="a-ic" style="margin-top:60px">${ic("key",38)}</div><h1>New password</h1><p class="sub">${esc(view.resetEmail||"")}</p>
+   <div class="a-card"><form data-form="resetnew" novalidate>
+     <label class="l" style="margin-top:0">New password</label>${field("lock","f-pw","password","••••••••",'autocomplete="new-password"')}
+     <label class="l">Confirm password</label>${field("lock","f-pw2","password","••••••••",'autocomplete="new-password"')}
+     <div class="err" id="err"></div>
+     <button class="btn-wide" type="submit">Save password</button></form></div></div>`;
+}
+function invalidHTML(){
+  return `<div class="auth" style="padding-top:150px"><div class="a-ic">${ic("alert",38)}</div>
+   <h1>Invalid reset link</h1><p class="sub">This password reset link is missing or invalid</p>
+   <div class="msg-card">The link you used appears to be incomplete. Please request a new password reset email.</div>
+   <div class="foot" style="margin-top:36px"><button class="link" data-a="gotoForgot" style="font-size:22px;font-weight:500">Request a new link</button></div></div>`;
+}
+
+/* ---------- modals ---------- */
+const modal=document.getElementById("modal");
+const closeModal=()=>{const o=modal.firstElementChild;if(!o)return;o.classList.add("out");setTimeout(()=>{if(modal.firstElementChild===o)modal.innerHTML=""},220)};
+let draft={};
+function subjModal(){
+  draft={color:COLORS[1],icon:"book"};
+  modal.innerHTML=`<div class="overlay" data-a="overlay"><div class="sheet center">
+   <button class="close-x" data-a="close" aria-label="Close">${ic("x",26)}</button>
+   <h2>New subject</h2>
+   <label class="l">Name</label><input class="inp" id="f-name" placeholder="e.g. Mathematics" maxlength="40" autocomplete="off">
+   <label class="l">Color</label><div class="colors">${COLORS.map(c=>`<button class="color ${c===draft.color?"sel":""}" style="background:${c}" data-a="pickColor" data-v="${c}" aria-label="Color"></button>`).join("")}</div>
+   <label class="l">Logo</label><div class="icons">${ICONS.map(i=>`<button class="ico ${i===draft.icon?"sel":""}" data-a="pickIcon" data-v="${i}">${ic(i,28)}</button>`).join("")}</div>
+   <button class="btn-wide" id="save-btn" data-a="saveSubj" disabled>Save</button><button class="cancel" data-a="close">Cancel</button></div></div>`;
+  setTimeout(()=>document.getElementById("f-name").focus(),60);
+}
+function exModal(){
+  modal.innerHTML=`<div class="overlay" data-a="overlay"><div class="sheet"><div class="grab"></div>
+   <h2>New exercise</h2>
+   <label class="l" style="margin-top:0">Title</label><input class="inp" id="f-title" placeholder="e.g. Exercise 5 page 42" maxlength="120" autocomplete="off">
+   <label class="l">For whom</label><input class="inp" id="f-who" placeholder="e.g. Youssef" maxlength="40" autocomplete="off">
+   <label class="l">Importance</label>
+   <div class="selwrap"><span class="dot" id="f-dot" style="background:${IMP.medium.color}"></span>
+     <select class="sel" id="f-imp"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+     <span class="arrow">${ic("down",24)}</span></div>
+   <button class="btn-wide" id="save-btn" data-a="saveEx" disabled>Save</button><button class="cancel" data-a="close">Cancel</button></div></div>`;
+  setTimeout(()=>document.getElementById("f-title").focus(),60);
+}
+document.addEventListener("input",ev=>{
+  if(ev.target.id==="f-name"||ev.target.id==="f-title"){const b=document.getElementById("save-btn");if(b)b.disabled=!ev.target.value.trim()}
+});
+document.addEventListener("change",ev=>{
+  if(ev.target.id==="f-imp")document.getElementById("f-dot").style.background=IMP[ev.target.value].color;
+});
+
+/* ---------- toast ---------- */
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
+const setErr=m=>{const e=document.getElementById("err");if(e)e.textContent=m;
+  const c=document.querySelector(".a-card");if(c){c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}};
+const emailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+/* ---------- forms ---------- */
+document.addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const k=ev.target.dataset.form,g=id=>{const el=document.getElementById(id);return el?el.value:""};
+  const email=g("f-email").trim().toLowerCase(),pw=g("f-pw"),pw2=g("f-pw2");
+  if(k==="login"){
+    if(!emailOk(email))return setErr("Please enter a valid email.");
+    if(!pw)return setErr("Please enter your password.");
+    const u=users[email];
+    if(!u||u.h!==await hash(email,pw))return setErr("Incorrect email or password.");
+    session=email;LS.set("hwt_session",session);loadData();view={page:"home"};render();
+  }else if(k==="signup"){
+    if(!emailOk(email))return setErr("Please enter a valid email.");
+    if(pw.length<6)return setErr("Password must be at least 6 characters.");
+    if(pw!==pw2)return setErr("Passwords don't match.");
+    if(users[email])return setErr("An account with this email already exists.");
+    users[email]={h:await hash(email,pw)};LS.set("hwt_users",users);
+    session=email;LS.set("hwt_session",session);loadData();view={page:"home"};render();
+  }else if(k==="forgot"){
+    if(!emailOk(email))return setErr("Please enter a valid email.");
+    if(!users[email])return setErr("No account found with this email.");
+    view={page:"resetnew",resetEmail:email};render();
+  }else if(k==="resetnew"){
+    if(pw.length<6)return setErr("Password must be at least 6 characters.");
+    if(pw!==pw2)return setErr("Passwords don't match.");
+    users[view.resetEmail]={h:await hash(view.resetEmail,pw)};LS.set("hwt_users",users);
+    view={page:"login"};render();toast("Password updated. Log in with your new password.");
+  }
+});
+
+/* ---------- clicks ---------- */
+document.addEventListener("click",ev=>{
+  const el=ev.target.closest("[data-a]");if(!el)return;
+  const a=el.dataset.a,id=el.dataset.id;
+  if(a==="overlay"){if(ev.target===el)closeModal();return}
+  switch(a){
+    case "nav":view={page:el.dataset.p,showArchive:false};render();break;
+    case "dark":ui.dark=!ui.dark;LS.set("hwt_ui",ui);render();break;
+    case "open":view={page:"subject",subjectId:id,showArchive:false};render();window.scrollTo(0,0);break;
+    case "back":view={page:"home"};render();break;
+    case "addSubj":subjModal();break;
+    case "pickColor":draft.color=el.dataset.v;document.querySelectorAll(".color").forEach(b=>b.classList.toggle("sel",b.dataset.v===draft.color));break;
+    case "pickIcon":draft.icon=el.dataset.v;document.querySelectorAll(".ico").forEach(b=>b.classList.toggle("sel",b.dataset.v===draft.icon));break;
+    case "saveSubj":{const n=document.getElementById("f-name").value.trim();if(!n)return;
+      const nid=uid();fresh=nid;data.subjects.push({id:nid,name:n,color:draft.color,icon:draft.icon});saveData();closeModal();render();break}
+    case "delSubj":ev.stopPropagation();
+      if(confirm("Delete this subject and all its exercises?")){animOut(el,"out",()=>{data.subjects=data.subjects.filter(s=>s.id!==id);data.exercises=data.exercises.filter(e=>e.subjectId!==id);saveData();render()},300)}break;
+    case "addEx":exModal();break;
+    case "saveEx":{const t=document.getElementById("f-title").value.trim();if(!t)return;
+      const nid=uid();fresh=nid;
+      data.exercises.push({id:nid,subjectId:view.subjectId,title:t,who:document.getElementById("f-who").value.trim(),
+        importance:document.getElementById("f-imp").value,done:false,created:Date.now()});saveData();closeModal();render();break}
+    case "toggle":{const e=data.exercises.find(x=>x.id===id);if(e){
+      const go=()=>{e.done=!e.done;saveData();render()};
+      if(!e.done){el.innerHTML=ic("check",18,4);animOut(el,"checking",go,620)}else go()}break}
+    case "delEx":if(confirm("Delete this exercise?")){animOut(el,"out",()=>{data.exercises=data.exercises.filter(e=>e.id!==id);saveData();render()},300)}break;
+    case "archive":view.showArchive=!view.showArchive;render();break;
+    case "close":closeModal();break;
+    case "reset":if(confirm("All your subjects and exercises will be erased. Sure?")){data={subjects:[],exercises:[]};saveData();view={page:"home"};render()}break;
+    case "logout":session=null;LS.set("hwt_session",null);data={subjects:[],exercises:[]};view={page:"login"};render();break;
+    case "gotoLogin":view={page:"login"};render();break;
+    case "gotoSignup":view={page:"signup"};render();break;
+    case "gotoForgot":view={page:"forgot"};render();break;
+    case "google":toast("Google sign-in needs an online server. Please use email and password.");break;
+  }
+});
+render();
+
+/* ---------- splash ---------- */
+(function(){
+  const s=document.getElementById("splash");if(!s)return;
+  let gone=false;
+  const hide=()=>{if(gone)return;gone=true;s.classList.add("hide");setTimeout(()=>s.remove(),650);
+    const app=document.getElementById("app");app.classList.remove("enter");void app.offsetWidth;app.classList.add("enter")};
+  setTimeout(hide,2900);
+  s.addEventListener("click",hide);
+})();
+</script>
+</body>
+</html>
